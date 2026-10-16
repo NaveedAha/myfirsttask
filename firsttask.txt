@@ -1,0 +1,57 @@
+---
+name: Flowchart Creator
+description: Guidelines for generating clean, render-safe Mermaid.js flowcharts for any technical or business workflow.
+---
+
+# Flowchart Creator
+
+A quick personal reference and prompt instruction for turning complex workflows, system logic, or simple tasks into clean Mermaid flowcharts that don’t look messy or fail to render.
+
+## Core Rules
+
+1. **Top-Down by Default:** Use `flowchart TD`. Only switch to `flowchart LR` if it's a short, strictly linear pipeline (e.g., CI/CD stages).
+2. **Quote Every Label:** Mermaid breaks if you use question marks, brackets, or commas inside node text. Always wrap labels inside double quotes: `A["Step 1"]` or `B{"Is valid?"}`.
+3. **Keep IDs Semantic or Incremental:** Use short descriptive IDs or clear sequences (`check_auth`, `send_email`, `node_1`) so the code remains readable when updating it later.
+4. **Action-Driven Labels:** 2 to 5 words max. Start steps with active verbs (`Fetch user token`, `Validate schema`).
+
+## Node Syntax Cheat Sheet
+
+- **Start / Stop:** `([ "Start / End label" ])`
+- **Standard Action:** `[ "Action name" ]`
+- **Decision:** `{ "Condition question?" }`
+- **Input / Output:** `[/ "File, payload, or user input" /]`
+- **Sub-process / External service:** `[[ "External service or API" ]]`
+- **Database / Storage:** `[( "Database / Bucket" )]`
+
+## Decision & Branching Standards
+
+- Use pipe syntax for branch labels: `-->|Yes|` and `-->|No|`.
+- For multi-outcome checks, label every branch clearly (e.g., `-->|200 OK|`, `-->|404|`, `-->|Timeout|`).
+- Avoid spaghetti connectors: if two error states do the same thing, route both directly to the same failure or retry block.
+- Multiple terminal nodes (`Success`, `Aborted`, `Failed`) are completely fine—forcing everything into a single "End" bubble usually makes the lines cross awkwardly.
+
+## Handling Complexity
+
+- **Simple tasks:** 5 to 8 nodes total. Keep it on one flat diagram.
+- **Complex workflows:** If there are multiple actors or systems (e.g., Frontend vs Backend vs Database), group them using `subgraph` blocks rather than trying to fit 20 connected steps into one clump.
+
+---
+
+## Output Template
+
+When asking to create a chart, format the output like this:
+
+### <Process Name>
+
+<A single sentence explaining what this flow represents and where it starts/finishes.>
+
+```mermaid
+flowchart TD
+    start([ "Start" ]) --> check_input[/ "Read incoming payload" /]
+    check_input --> is_valid{ "Is data valid?" }
+
+    is_valid -->|Yes| run_task[ "Execute core operation" ]
+    is_valid -->|No| log_error[ "Log validation failure" ]
+
+    run_task --> done([ "Complete" ])
+    log_error --> exit_failed([ "Exit with Error" ])
